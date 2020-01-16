@@ -72,8 +72,8 @@ export const UNSTAR_REPOSITORY = gql`
 `;
 
 export const WATCH_REPOSITORY = gql`
-  mutation($id: ID!, $state: SubscriptionState!) {
-    updateSubscription(input: { subscribableId: $id, state: $state}) {
+  mutation($id: ID!, $viewerSubscription: SubscriptionState!) {
+    updateSubscription(input: { subscribableId: $id, state: $viewerSubscription}) {
       subscribable {
         id
         viewerSubscription
@@ -81,3 +81,8 @@ export const WATCH_REPOSITORY = gql`
     }
   }
 `;
+
+export const VIEWER_SUBSCRIPTIONS = {
+  SUBSCRIBED: 'SUBSCRIBED',
+  UNSUBSCRIBED: 'UNSUBSCRIBED',
+};

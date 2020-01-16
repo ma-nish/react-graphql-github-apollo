@@ -4,9 +4,11 @@ import { Mutation } from 'react-apollo';
 import Link from '../../Link';
 import Button from '../../Button/index';
 import '../../style.css';
-import { STAR_REPOSITORY, UNSTAR_REPOSITORY, WATCH_REPOSITORY, } from '../../queries/index';
-import { updateAddStar, updateRemoveStar, increaseSubscription, decreaseSubscription } from '../index';
+import { STAR_REPOSITORY, UNSTAR_REPOSITORY, WATCH_REPOSITORY, VIEWER_SUBSCRIPTIONS } from '../../queries/index';
+import { updateAddStar, updateRemoveStar, updateWatch } from '../index';
 
+const isWatch = viewerSubscription =>
+  viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED;
 
 const RepositoryItem = ({
   id,
@@ -26,7 +28,21 @@ const RepositoryItem = ({
           <Link href={url}>{name}</Link>
         </h2>
         {!viewerHasStarred ? (
-          <Mutation mutation={STAR_REPOSITORY} variables={{ id }} update={updateAddStar}>
+          <Mutation
+            mutation={STAR_REPOSITORY}
+            variables={{ id }}
+            optimisticResponse={{
+              addStar: {
+                __typename: 'Mutation',
+                starrable: {
+                  __typename: 'Repository',
+                  id,
+                  viewerHasStarred: true,
+                },
+              },
+            }}
+            update={updateAddStar}
+          >
             {(addStar, { data, loading, error }) => (
               <Button
                 className={'RepositoryItem-title-action'}
@@ -37,7 +53,21 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-            <Mutation mutation={UNSTAR_REPOSITORY} variables={{ id }} update={updateRemoveStar}>
+            <Mutation
+              mutation={UNSTAR_REPOSITORY}
+              variables={{ id }}
+              optimisticResponse={{
+                removeStar: {
+                  __typename: 'Mutation',
+                  starrable: {
+                    __typename: 'Repository',
+                    id,
+                    viewerHasStarred: false,
+                  },
+                },
+              }}
+              update={updateRemoveStar}
+            >
               {(removeStar, { data, loading, error }) => (
                 <Button
                   className={'RepositoryItem-title-action'}
@@ -48,29 +78,38 @@ const RepositoryItem = ({
               )}
             </Mutation>
           )}
-        {viewerSubscription === "UNSUBSCRIBED" ? (
-          <Mutation mutation={WATCH_REPOSITORY} variables={{ id, state: 'SUBSCRIBED' }} update={increaseSubscription}>
-            {(updateSubscription, { data, loading, error }) => (
-              <Button
-                className={'RepositoryItem-title-action'}
-                onClick={updateSubscription}
-              >
-                {watchers.totalCount} Watch
-              </Button>
-            )}
-          </Mutation>
-        ) : (
-            <Mutation mutation={WATCH_REPOSITORY} variables={{ id, state: 'UNSUBSCRIBED' }} update={decreaseSubscription}>
-              {(updateSubscription, { data, loading, error }) => (
-                <Button
-                  className={'RepositoryItem-title-action'}
-                  onClick={updateSubscription}
-                >
-                  {watchers.totalCount} Unwatch
+        <Mutation
+          mutation={WATCH_REPOSITORY}
+          variables={{
+            id,
+            viewerSubscription: isWatch(viewerSubscription)
+              ? VIEWER_SUBSCRIPTIONS.UNSUBSCRIBED
+              : VIEWER_SUBSCRIPTIONS.SUBSCRIBED,
+          }}
+          optimisticResponse={{
+            updateSubscription: {
+              __typename: 'Mutation',
+              subscribable: {
+                __typename: 'Repository',
+                id,
+                viewerSubscription: isWatch(viewerSubscription)
+                  ? VIEWER_SUBSCRIPTIONS.UNSUBSCRIBED
+                  : VIEWER_SUBSCRIPTIONS.SUBSCRIBED,
+              },
+            },
+          }}
+          update={updateWatch}
+        >
+          {(updateSubscription, { data, loading, error }) => (
+            <Button
+              className="RepositoryItem-title-action"
+              onClick={updateSubscription}
+            >
+              {watchers.totalCount}{' '}
+              {isWatch(viewerSubscription) ? 'Unwatch' : 'Watch'}
             </Button>
-              )}
-            </Mutation>
           )}
+        </Mutation>
       </div>
       <div className="RepositoryItem-description">
         <div

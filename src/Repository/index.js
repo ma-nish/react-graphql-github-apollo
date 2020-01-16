@@ -1,5 +1,5 @@
 import RepositoryList from './RepositoryList';
-import { REPOSITORY_FRAGMENT } from '../queries/index';
+import { REPOSITORY_FRAGMENT, VIEWER_SUBSCRIPTIONS } from '../queries/index';
 
 export const updateAddStar = (client, { data: { addStar: { starrable: { id } } } }, ) => {
   const repository = client.readFragment({
@@ -43,13 +43,27 @@ export const updateRemoveStar = (client, { data: { removeStar: { starrable: { id
   });
 };
 
-export const increaseSubscription = (client, { data: { updateSubscription: { subscribable: { id } } } }) => {
+export const updateWatch = (
+  client,
+  {
+    data: {
+      updateSubscription: {
+        subscribable: { id, viewerSubscription },
+      },
+    },
+  },
+) => {
   const repository = client.readFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
   });
 
-  const totalCount = repository.watchers.totalCount + 1;
+  let { totalCount } = repository.watchers;
+
+  totalCount =
+    viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED
+      ? totalCount + 1
+      : totalCount - 1;
 
   client.writeFragment({
     id: `Repository:${id}`,
@@ -58,31 +72,10 @@ export const increaseSubscription = (client, { data: { updateSubscription: { sub
       ...repository,
       watchers: {
         ...repository.watchers,
-        totalCount
-      }
-    }
-  })
-}
-
-export const decreaseSubscription = (client, { data: { updateSubscription: { subscribable: { id } } } }) => {
-  const repository = client.readFragment({
-    id: `Repository:${id}`,
-    fragment: REPOSITORY_FRAGMENT,
+        totalCount,
+      },
+    },
   });
-
-  const totalCount = repository.watchers.totalCount - 1;
-
-  client.writeFragment({
-    id: `Repository:${id}`,
-    fragment: REPOSITORY_FRAGMENT,
-    data: {
-      ...repository,
-      watchers: {
-        ...repository.watchers,
-        totalCount
-      }
-    }
-  })
-}
+};
 
 export default RepositoryList;
