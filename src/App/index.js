@@ -1,9 +1,8 @@
-import React from 'react'
+import React from 'react';
+import Profile from '../Profile';
 
-export default function App() {
-  return (
-    <div>
-Hello
-    </div>
-  )
+const App = () => {
+  return (<Profile />)
 }
+
+export default App;
