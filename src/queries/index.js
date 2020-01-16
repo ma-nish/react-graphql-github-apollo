@@ -7,7 +7,32 @@ export const GET_CURRENT_USER = gql`{
   }
 }`;
 
-export const GET_REPOSITORIES_OF_CURRENT_USER = gql`{
+export const REPOSITORY_FRAGMENT = gql`
+  fragment repository on Repository {
+    id
+    name
+    url
+    descriptionHTML
+    primaryLanguage {
+      name
+    }
+    owner {
+      login
+      url
+    }
+    stargazers {
+      totalCount
+    }
+    viewerHasStarred
+    watchers {
+      totalCount
+    }
+    viewerSubscription
+  }
+`;
+
+export const GET_REPOSITORIES_OF_CURRENT_USER = gql`
+{
   viewer {
     repositories(
       last: 5
@@ -15,30 +40,14 @@ export const GET_REPOSITORIES_OF_CURRENT_USER = gql`{
     ) {
       edges {
         node {
-          id
-          name
-          url
-          descriptionHTML
-          primaryLanguage {
-            name
-          }
-          owner {
-            login
-            url
-          }
-          stargazers {
-            totalCount
-          }
-          viewerHasStarred
-          watchers {
-            totalCount
-          }
-          viewerSubscription
+          ...repository
         }
       }
     }
   }
-}`;
+}
+${REPOSITORY_FRAGMENT}
+`;
 
 export const STAR_REPOSITORY = gql`
   mutation($id: ID!) {
@@ -62,7 +71,7 @@ export const UNSTAR_REPOSITORY = gql`
   }
 `;
 
-export const UPDATE_SUBSCRIPTION = gql`
+export const WATCH_REPOSITORY = gql`
   mutation($id: ID!, $state: SubscriptionState!) {
     updateSubscription(input: { subscribableId: $id, state: $state}) {
       subscribable {

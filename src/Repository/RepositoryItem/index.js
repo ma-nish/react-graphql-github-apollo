@@ -4,7 +4,9 @@ import { Mutation } from 'react-apollo';
 import Link from '../../Link';
 import Button from '../../Button/index';
 import '../../style.css';
-import { STAR_REPOSITORY, UNSTAR_REPOSITORY, UPDATE_SUBSCRIPTION } from '../../queries/index';
+import { STAR_REPOSITORY, UNSTAR_REPOSITORY, WATCH_REPOSITORY, } from '../../queries/index';
+import { updateAddStar, updateRemoveStar, increaseSubscription, decreaseSubscription } from '../index';
+
 
 const RepositoryItem = ({
   id,
@@ -24,7 +26,7 @@ const RepositoryItem = ({
           <Link href={url}>{name}</Link>
         </h2>
         {!viewerHasStarred ? (
-          <Mutation mutation={STAR_REPOSITORY} variables={{ id }}>
+          <Mutation mutation={STAR_REPOSITORY} variables={{ id }} update={updateAddStar}>
             {(addStar, { data, loading, error }) => (
               <Button
                 className={'RepositoryItem-title-action'}
@@ -35,7 +37,7 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-            <Mutation mutation={UNSTAR_REPOSITORY} variables={{ id }}>
+            <Mutation mutation={UNSTAR_REPOSITORY} variables={{ id }} update={updateRemoveStar}>
               {(removeStar, { data, loading, error }) => (
                 <Button
                   className={'RepositoryItem-title-action'}
@@ -47,7 +49,7 @@ const RepositoryItem = ({
             </Mutation>
           )}
         {viewerSubscription === "UNSUBSCRIBED" ? (
-          <Mutation mutation={UPDATE_SUBSCRIPTION} variables={{ id, state: 'SUBSCRIBED' }}>
+          <Mutation mutation={WATCH_REPOSITORY} variables={{ id, state: 'SUBSCRIBED' }} update={increaseSubscription}>
             {(updateSubscription, { data, loading, error }) => (
               <Button
                 className={'RepositoryItem-title-action'}
@@ -58,7 +60,7 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-            <Mutation mutation={UPDATE_SUBSCRIPTION} variables={{ id, state: 'UNSUBSCRIBED' }}>
+            <Mutation mutation={WATCH_REPOSITORY} variables={{ id, state: 'UNSUBSCRIBED' }} update={decreaseSubscription}>
               {(updateSubscription, { data, loading, error }) => (
                 <Button
                   className={'RepositoryItem-title-action'}
@@ -92,4 +94,5 @@ const RepositoryItem = ({
       </div>
     </div>
   );
+
 export default RepositoryItem;
