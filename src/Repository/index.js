@@ -78,4 +78,24 @@ export const updateWatch = (
   });
 };
 
+export const updateQuery = (previousResult, { fetchMoreResult }) => {
+  if (!fetchMoreResult) {
+    return previousResult;
+  }
+  return {
+    ...previousResult,
+    viewer: {
+      ...previousResult.viewer,
+      repositories: {
+        ...previousResult.viewer.repositories,
+        ...fetchMoreResult.viewer.repositories,
+        edges: [
+          ...previousResult.viewer.repositories.edges,
+          ...fetchMoreResult.viewer.repositories.edges,
+        ],
+      },
+    },
+  };
+};
+
 export default RepositoryList;

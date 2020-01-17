@@ -32,21 +32,26 @@ export const REPOSITORY_FRAGMENT = gql`
 `;
 
 export const GET_REPOSITORIES_OF_CURRENT_USER = gql`
-{
-  viewer {
-    repositories(
-      last: 5
-      orderBy: {field: STARGAZERS, direction: ASC}
-    ) {
-      edges {
-        node {
-          ...repository
+  query($cursor: String) {
+    viewer {
+      repositories(
+        first: 5
+        orderBy: { direction: DESC, field: STARGAZERS }
+        after: $cursor
+      ) {
+        edges {
+          node {
+            ...repository
+          }
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }
   }
-}
-${REPOSITORY_FRAGMENT}
+  ${REPOSITORY_FRAGMENT}
 `;
 
 export const STAR_REPOSITORY = gql`

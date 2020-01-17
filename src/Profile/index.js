@@ -1,20 +1,30 @@
 import React from 'react';
-import { graphql } from 'react-apollo';
+import { Query } from 'react-apollo';
 
 import { GET_REPOSITORIES_OF_CURRENT_USER } from '../queries/index';
 import Loading from '../Loading/index';
 import RepositoryList from '../Repository/index';
 import ErrorMessage from '../Error/index';
 
-const Profile = ({ data, loading, error }) => {
-  if (error) {
-    return <ErrorMessage error={error} />;
-  }
-  const { viewer } = data;
-  if (loading || !viewer) {
-    return <Loading />;
-  }
-  return <RepositoryList repositories={viewer.repositories} />;
-};
+const Profile = () => (
+  <Query
+    query={GET_REPOSITORIES_OF_CURRENT_USER}
+    notifyOnNetworkStatusChange={true}
+  >
+    {({ data, loading, error, fetchMore }) => {
+      if (error) {
+        return <ErrorMessage error={error} />;
+      }
 
-export default graphql(GET_REPOSITORIES_OF_CURRENT_USER)(Profile);
+      if (loading && !data) {
+        return <Loading />;
+      }
+
+      const { viewer } = data;
+
+      return <RepositoryList repositories={viewer.repositories} fetchMore={fetchMore} loading={loading} />;
+    }}
+  </Query>
+);
+
+export default Profile;
