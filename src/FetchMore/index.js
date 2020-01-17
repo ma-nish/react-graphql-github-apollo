@@ -2,7 +2,8 @@ import React from 'react';
 
 import Loading from '../Loading';
 import { ButtonUnobtrusive } from '../Button';
-import '../style.css';
+
+import './style.css';
 
 const FetchMore = ({
   loading,

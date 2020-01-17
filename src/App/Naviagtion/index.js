@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 
-import * as routes from '../constants/routes';
+import * as routes from '../../constants/routes';
 
-import Button from '../Button';
-import Input from '../Input';
+import Button from '../../Button';
+import Input from '../../Input';
 
-import '../style.css';
+import './style.css';
 
 const Navigation = ({
   location: { pathname },

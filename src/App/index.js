@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import Navigation from '../Naviagtion';
+import Navigation from './Naviagtion';
 import Profile from '../Profile';
 import Organization from '../Organization';
 
 import * as routes from '../constants/routes';
 
-import '../style.css';
+import './style.css';
 
 const App = () => {
   const [organizationName, setOraganizationName] = useState('the-road-to-learn-react');

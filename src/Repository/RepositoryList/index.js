@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react';
 
-import { getUpdateQuery } from '../index';
+import { getUpdateQuery } from '../fragments';
 import RepositoryItem from '../RepositoryItem/index';
 import FetchMore from '../../FetchMore/index';
-import '../../style.css';
+
+import '../style.css';
 
 const RepositoryList = ({ repositories, fetchMore, loading, entry, }) => (
   <Fragment>
