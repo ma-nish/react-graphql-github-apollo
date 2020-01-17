@@ -22,7 +22,12 @@ const Profile = () => (
 
       const { viewer } = data;
 
-      return <RepositoryList repositories={viewer.repositories} fetchMore={fetchMore} loading={loading} />;
+      return <RepositoryList
+        repositories={viewer.repositories}
+        fetchMore={fetchMore}
+        loading={loading}
+        entry={'viewer'}
+      />;
     }}
   </Query>
 );

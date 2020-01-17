@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react';
 
-import { updateQuery } from '../index';
+import { getUpdateQuery } from '../index';
 import RepositoryItem from '../RepositoryItem/index';
 import FetchMore from '../../FetchMore/index';
 import '../../style.css';
 
-const RepositoryList = ({ repositories, fetchMore, loading }) => (
+const RepositoryList = ({ repositories, fetchMore, loading, entry, }) => (
   <Fragment>
     {repositories.edges.map(({ node }) => (
       <div key={node.id} className="RepositoryItem">
@@ -18,7 +18,7 @@ const RepositoryList = ({ repositories, fetchMore, loading }) => (
       variables={{
         cursor: repositories.pageInfo.endCursor,
       }}
-      updateQuery={updateQuery}
+      updateQuery={getUpdateQuery(entry)}
       fetchMore={fetchMore}
     >
       Repositories
