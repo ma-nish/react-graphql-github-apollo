@@ -1,49 +1,133 @@
-import React from 'react';
-import { Query } from 'react-apollo';
+import React, { useState } from 'react';
+import { Query, ApolloConsumer } from 'react-apollo';
 
-import { GET_ISSUES_OF_REPOSITORY } from '../querries';
+import {
+  GET_ISSUES_OF_REPOSITORY,
+  ISSUE_STATES,
+  TRANSITION_LABELS,
+  TRANSITION_STATE,
+} from '../querries';
 
 import IssueItem from '../IssueItem';
 import Loading from '../../Loading';
 import ErrorMessage from '../../Error';
+import { ButtonUnobtrusive } from '../../Button';
 
 import './style.css';
 
-const Issues = ({ repositoryOwner, repositoryName }) =>
-  <div className="Issues">
-    <Query
-      query={GET_ISSUES_OF_REPOSITORY}
-      variables={{
-        repositoryOwner,
-        repositoryName,
-      }}
-    >
-      {({ data, loading, error }) => {
-        if (error) {
-          return <ErrorMessage error={error} />;
-        }
+const isShow = issueState => issueState !== ISSUE_STATES.NONE;
 
-        if (loading && !data) {
-          return <Loading />;
-        }
+const Issues = ({ repositoryOwner, repositoryName }) => {
+  const [issueState, setIssueState] = useState(ISSUE_STATES.NONE);
 
-        const { repository } = data;
+  const onChangeIssueState = nextIssueState => {
+    setIssueState(nextIssueState);
+  }
 
-        if (!repository.issues.edges.length) {
-          return <div className="IssueList">No issues ...</div>;
-        }
+  return (
+    < div className="Issues" >
+      <IssueFilter
+        repositoryOwner={repositoryOwner}
+        repositoryName={repositoryName}
+        issueState={issueState}
+        onChangeIssueState={onChangeIssueState}
+      />
 
-        return <IssueList issues={repository.issues} />;
-      }}
-    </Query>
-  </div>
+      {isShow(issueState) && (
+        <Query
+          query={GET_ISSUES_OF_REPOSITORY}
+          variables={{
+            repositoryOwner,
+            repositoryName,
+          }}
+        >
+          {({ data, loading, error }) => {
+            if (error) {
+              return <ErrorMessage error={error} />;
+            }
 
-const IssueList = ({ issues }) => (
+            if (loading && !data) {
+              return <Loading />;
+            }
+
+            const { repository } = data;
+
+
+            const filteredRepository = {
+              issues: {
+                edges: repository.issues.edges.filter(
+                  issue => issue.node.state === issueState,
+                ),
+              },
+            };
+
+            if (!filteredRepository.issues.edges.length) {
+              return <div className="IssueList">No issues ...</div>;
+            }
+
+            return <IssueList
+              issues={filteredRepository.issues}
+              repositoryOwner={repositoryOwner}
+              repositoryName={repositoryName}
+            />;
+          }}
+        </Query>
+      )
+      }
+    </div>
+  )
+}
+
+const IssueList = ({ issues, repositoryOwner, repositoryName, }) => (
   <div className="IssueList">
     {issues.edges.map(({ node }) => (
-      <IssueItem key={node.id} issue={node} />
+      <IssueItem
+        key={node.id}
+        issue={node}
+        repositoryOwner={repositoryOwner}
+        repositoryName={repositoryName}
+      />
     ))}
   </div>
 );
+
+const IssueFilter = ({
+  repositoryOwner,
+  repositoryName,
+  issueState,
+  onChangeIssueState,
+}) => (
+    <ApolloConsumer>
+      {client => (
+        <ButtonUnobtrusive
+          onClick={() => onChangeIssueState(TRANSITION_STATE[issueState])}
+          onMouseOver={() => prefetchIssues(client, repositoryOwner, repositoryName, issueState)}
+        >
+          {TRANSITION_LABELS[issueState]}
+        </ButtonUnobtrusive>
+      )}
+    </ApolloConsumer>
+  );
+
+
+const prefetchIssues = (
+  client,
+  repositoryOwner,
+  repositoryName,
+  issueState,
+) => {
+  const nextIssueState = TRANSITION_STATE[issueState];
+
+  if (isShow(nextIssueState)) {
+    client.query({
+      query: GET_ISSUES_OF_REPOSITORY,
+      variables: {
+        repositoryOwner,
+        repositoryName,
+        issueState: nextIssueState,
+      },
+    });
+  }
+};
 
 export default Issues;
