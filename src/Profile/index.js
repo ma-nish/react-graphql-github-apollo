@@ -1,7 +1,7 @@
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { GET_REPOSITORIES_OF_CURRENT_USER } from '../Repository/queries';
+import { GET_REPOSITORIES_OF_CURRENT_USER } from '../Repository/querries';
 import Loading from '../Loading/index';
 import RepositoryList from '../Repository/index';
 import ErrorMessage from '../Error/index';

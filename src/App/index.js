@@ -13,7 +13,7 @@ const App = () => {
   const [organizationName, setOraganizationName] = useState('the-road-to-learn-react');
 
   const onOrganizationSearch = value => setOraganizationName(value);
-  
+
   return (
     <Router>
       <div className="App">
@@ -27,7 +27,7 @@ const App = () => {
             path={routes.ORGANIZATION}
             component={() => (
               <div className="App-content_large-header">
-                <Organization organizationName={organizationName} />
+                <Organization organizationName={organizationName ? organizationName : 'the-road-to-learn-react'} />
               </div>
             )}
           />
